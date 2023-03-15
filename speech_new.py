@@ -24,7 +24,7 @@ from pyfirmata import Arduino, OUTPUT, util
 from time import sleep
 
 # TODO subject to change accroding to setting
-port = "/dev/cu.usmodem143401"
+port = "/dev/cu.usmodem144301"
 pin = 13
 board = Arduino(port)
 

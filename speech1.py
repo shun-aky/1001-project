@@ -6,8 +6,7 @@ import time
 import pyttsx3
 
 # TODO subject to change accroding to personal setting
-port = "/dev/cu.usbmodem143401" # Need change
-pin = 13
+port = "/dev/cu.usbmodem144301" # Need change
 board = Arduino(port)
 
 trigger_pin = 2
@@ -15,14 +14,10 @@ echo_pin = 3
 led_pin = 13
 HIGH = 1
 LOW = 0
-board = Arduino(port)
 
 board.digital[trigger_pin].mode = OUTPUT
 board.digital[echo_pin].mode = INPUT
 board.digital[led_pin].mode = OUTPUT
-
-
-board.digital[pin].mode = OUTPUT
 
 def light_on(pin):
     board.digital[pin].write(1)
@@ -33,13 +28,22 @@ def light_off(pin):
     time.sleep(0.015)
 
 while(True):
-    board.digital[trigger_pin] = HIGH
-    time.sleep(0.00001)
-    board.digital[trigger_pin] = LOW
 
-    pulse_duration = board.digital[echo_pin].pulse_read()
+    board.digital[trigger_pin].write(HIGH)
+    time.sleep(1)
+    board.digital[trigger_pin].write(LOW)
 
-    distance = pulse_duration * 34300 / 2
+    print("start the program!!")
+    # pulse_duration = board.digital[echo_pin].pulse_in()
+    # distance = pulse_duration * 0.034 / 2
+    echo_pin = board.get_pin('d:3:o')
+    duration = echo_pin.ping()
+    distance = util.ping_time_to_distance(duration)
+
+    # pulse_start = board.get_last_pin_timing()[echo_pin]
+    # pulse_end = board.get_last_pin_timing()[echo_pin]
+    # pulse_duration = pulse_end - pulse_start
+    # distance = pulse_duration * 0.034 / 2
 
     if distance <= 10:
         # obtain audio from the microphone
@@ -63,12 +67,12 @@ while(True):
                 print("door is open!!")
                 engine.say("door is open")
                 engine.runAndWait()
-                light_on(pin)
+                light_on(led_pin)
             elif (text == "close the door"):
                 print("door is closed!!")
                 engine.say("door is closed")
                 engine.runAndWait()
-                light_off(pin)
+                light_off(led_pin)
         except sr.UnknownValueError:
             engine.say("Google Speech Recognition could not understand audio")
             print("I cannot undersatand")
