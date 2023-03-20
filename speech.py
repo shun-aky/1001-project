@@ -6,7 +6,7 @@ from time import sleep
 import pyttsx3
 
 # TODO subject to change accroding to personal setting
-port = "/dev/cu.usbmodem144301" # Need change
+port = "/dev/cu.usbmodem14301" # Need change
 pin = 13
 board = Arduino(port)
 
