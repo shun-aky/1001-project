@@ -20,17 +20,16 @@ class WebCamera:
     # TODO:
     # I should make a setter for distBtwEyes
     
+    # TODO:
+    # I should specify the return value
     def calculateDistance(self):
         # Capture frame-by-frame
         ret, frame = self.video_capture.read()
 
-
-        # NOTE: The focal length should be measured beforehand
-        # measure the focal length
         frame, faces = self.detector.findFaceMesh(frame, draw=False)
 
         if len(faces) != 1:
-            return None
+            return None, None
         face = faces[0]
         eyeLeft = face[145]
         eyeRight = face[374]
@@ -52,6 +51,7 @@ class WebCamera:
         # find the actual distance
         # f = 630
         d = (self.distBtwEyes * self.focalLength) / w
+
         print('*******this is the distance: *******')
         print(d)
 
