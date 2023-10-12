@@ -15,6 +15,19 @@ import webcam
 
 # TODO:
 # Layout GUI (I might need another file)
+
+CIRCLE = '⚫'
+CIRCLE_OUTLINE = '⚪'
+
+def LED(color, key):
+    """
+    A "user defined element".  In this case our LED is based on a Text element. This gives up 1 location to change how they look, size, etc.
+    :param color: (str) The color of the LED
+    :param key: (Any) The key used to look up the element
+    :return: (sg.Text) Returns a Text element that displays the circle
+    """
+    return sg.Text(CIRCLE_OUTLINE, text_color=color, key=key)
+
 image_viewer = [
     [sg.Text("TEST DEMO")],
     [sg.Image(filename="", key="-IMAGE-")],
@@ -22,10 +35,10 @@ image_viewer = [
 ]
 
 stage_indicator = [
-    [sg.Text(f"STAGE 1")],
-    [sg.Text(f"STAGE 2")],
-    [sg.Text(f"STAGE 3")],
-    [sg.Text(f"STAGE 4")]
+    [sg.Text(f"STAGE 1 "), LED("Red", "-LED1-")],
+    [sg.Text(f"STAGE 2 "), LED("Red", "-LED2-")],
+    [sg.Text(f"STAGE 3 "), LED("Red", "-LED3-")],
+    [sg.Text(f"STAGE 4 "), LED("Red", "-LED4-")]
 ]
 
 layout = [
