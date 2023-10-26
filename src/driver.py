@@ -1,5 +1,6 @@
-# NOTE: import libraries
+﻿# NOTE: import libraries
 import PySimpleGUI as sg
+from speech import speech_recognition
 
 # NOTE: This is for test
 import cv2
@@ -35,10 +36,11 @@ image_viewer = [
 ]
 
 stage_indicator = [
-    [sg.Text(f"STAGE 1 "), LED("Red", "-LED1-")],
-    [sg.Text(f"STAGE 2 "), LED("Red", "-LED2-")],
-    [sg.Text(f"STAGE 3 "), LED("Red", "-LED3-")],
-    [sg.Text(f"STAGE 4 "), LED("Red", "-LED4-")]
+    [sg.Text("Default"), LED("Red", "-LED1-")],
+    [sg.Text("Face Detected"), LED("Red", "-LED2-")],
+    [sg.Text("Password Passed"), LED("Red", "-LED3-")],
+    [sg.Text("Password Failed - Try Again"), LED("Red", "-LED4-")],
+    [sg.Text("Password Failed - Good Bye"), LED("Red", "-LED5-")]
 ]
 
 layout = [
@@ -54,18 +56,32 @@ webCam = webcam.WebCamera()
 
 while True:
     event, values = window.read(timeout=20)
+    window['-LED1-'].update(CIRCLE)
     if event == "Exit" or event == sg.WIN_CLOSED:
         break
-    
-    try:
-        d, frame = webCam.calculateDistance()
-    except:
-        # TODO:
-        # This is when the camera can't detect the face
-        continue
+
+    w, frame = webCam.calculateDistance()
 
     imgbytes = cv2.imencode('.png', frame)[1].tobytes()
     window["-IMAGE-"].update(data=imgbytes)
+
+    if w >= 350:
+        window['-LED1-'].update(CIRCLE_OUTLINE)
+        window['-LED2-'].update(CIRCLE)
+        print('You\'re in a range!! before speech_recognition')
+        if speech_recognition():
+            print("The door is open")
+                # call a function that opens the door
+        else:
+            if speech_recognition():
+                print("The door is open this time")
+            else:
+                print("Come back later")
+            print('You\'re in a range!! after speech_recognition')
+            continue
+    else:
+            print('not in range')
+        
 
 # TODO:
 # Initialize parameters

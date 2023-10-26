@@ -1,6 +1,8 @@
 # NOTE: This script is based on this link: https://www.youtube.com/watch?v=jsoe1M2AjFk
 import cv2
+import cvzone
 from cvzone.FaceMeshModule import FaceMeshDetector
+from cvzone.FaceDetectionModule import FaceDetector
 # from speech import speech_recognition
 
 # cascPath = "haarcascade_frontalface_default.xml"
@@ -8,9 +10,11 @@ from cvzone.FaceMeshModule import FaceMeshDetector
 class WebCamera:
     def __init__(self) -> None:
         self.video_capture = cv2.VideoCapture(0)
-        self.detector = FaceMeshDetector(maxFaces=1)
+##        self.detector = FaceMeshDetector(maxFaces=1)
+        self.detector = FaceDetector(minDetectionCon=0.5, modelSelection=0)
         self.focalLength = 630
         self.distBtwEyes = 6.3
+        self.threshold = 350 # (in px) it should be either input or global variable
 
     # TODO:
     # I should make a function to calculateFocalLength
@@ -26,19 +30,35 @@ class WebCamera:
         # Capture frame-by-frame
         ret, frame = self.video_capture.read()
 
-        frame, faces = self.detector.findFaceMesh(frame, draw=False)
+##        frame, faces = self.detector.findFaceMesh(frame, draw=True)
+        img, bboxs = self.detector.findFaces(frame, draw=False)
 
-        if len(faces) != 1:
-            return None, None
-        face = faces[0]
-        eyeLeft = face[145]
-        eyeRight = face[374]
-        # cv2.line(frame, eyeLeft, eyeRight, (0, 255, 0), 3)
+        width = -1
+
+        if bboxs:
+            bbox = bboxs[0]
+            x, y, w, h = bbox['bbox']
+            center = bbox['center']
+
+            color = (0, 0, 255)
+
+            if w >= self.threshold:
+                color = (0, 255, 0)
+
+            cv2.rectangle(img, (x, y, w, h), color, 5)
+            width = w
+
+##        if len(faces) != 1:
+##            return None, frame
+##        face = faces[0]
+##        eyeLeft = face[145]
+##        eyeRight = face[374]
+##        # cv2.line(frame, eyeLeft, eyeRight, (0, 255, 0), 3)
         # cv2.circle(frame, eyeLeft, 5, (255, 0, 255), cv2.FILLED)
         # cv2.circle(frame, eyeRight, 5, (255, 0, 255), cv2.FILLED)
 
         # w is a distance in pixel
-        w, _ = self.detector.findDistance(eyeLeft, eyeRight)
+##        w, _ = self.detector.findDistance(eyeLeft, eyeRight)
 
         # W is a distance between the left and right eye in cm
         # d is a distance between a camera and a face
@@ -49,13 +69,13 @@ class WebCamera:
         # print(f)
 
         # find the actual distance
-        # f = 630
-        d = (self.distBtwEyes * self.focalLength) / w
+##        # f = 630
+##        d = (self.distBtwEyes * self.focalLength) / w
+##
+##        print('*******this is the distance: *******')
+##        print(width)
 
-        print('*******this is the distance: *******')
-        print(d)
-
-        return d, frame
+        return width, frame
         # if d <= 30:
         #     print('You\'re in a range!! before speech_recognition')
         #     if speech_recognition():

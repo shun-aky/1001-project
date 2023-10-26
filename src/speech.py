@@ -16,6 +16,11 @@ import os
 # subject to change based on configuration
 port = "/dev/cu.usbserial-1430"
 pin = 13
+pin1 = 1
+pin2 = 2
+pin3 = 3
+pin4 = 4
+pin5 = 5
 
 # initialization
 
@@ -48,10 +53,11 @@ def speech_recognition():
     with sr.Microphone() as source:
         r.adjust_for_ambient_noise(source, duration=1)
         print('start listening')
-        audio = r.listen(source, phrase_time_limit=3)
+        
+        os.system("mpg321 welcome_words.mp3")
+        audio = r.listen(source, phrase_time_limit=5)
         print("Say something!")
         # This is path sensitive, which means I have to run this code in 1001-project directory
-        os.system("mpg321 welcome_words.mp3")
         print('finish listening')
 
     # recognize speech using Google Speech Recognition
