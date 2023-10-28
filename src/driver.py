@@ -1,12 +1,14 @@
-﻿# NOTE: import libraries
+﻿# NOTE: https://www.pysimplegui.org/en/latest/cookbook/#recipe-long-operations-multi-threading iw a helpful link for threading
+
+# NOTE: import libraries
 import PySimpleGUI as sg
-from speech import speech_recognition
+# from speech import speech_recognition
 
 # NOTE: This is for test
 import cv2
 
 # NOTE: import other py files
-import webcam
+# import webcam
 
 # TODO:
 # Read a keyword from the repo every week
@@ -29,10 +31,14 @@ def LED(color, key):
     """
     return sg.Text(CIRCLE_OUTLINE, text_color=color, key=key)
 
+initial_page = [
+    [sg.Text("Start Application")],
+    [sg.Button("START", size=(20, 2))]
+]
+
 image_viewer = [
     [sg.Text("TEST DEMO")],
     [sg.Image(filename="", key="-IMAGE-")],
-    [sg.Button("Exit", size=(10, 1))]
 ]
 
 stage_indicator = [
@@ -43,13 +49,22 @@ stage_indicator = [
     [sg.Text("Password Failed - Good Bye"), LED("Red", "-LED5-")]
 ]
 
-layout = [
+processing_page = [
     [
         sg.Column(image_viewer),
         sg.VSeperator(),
         sg.Column(stage_indicator)
     ]
 ]
+
+layout = [
+    [
+        sg.Column(initial_page, key='-COLINIT-', element_justification='c'),
+        sg.Column(processing_page, visible=False, key='-COLPROCESS-')
+    ],
+    [sg.Button("Exit", size=(10, 1))]
+]
+
 window = sg.Window("Open Sesame Application", layout, location=(800, 400))
 
 webCam = webcam.WebCamera()
@@ -69,16 +84,16 @@ while True:
         window['-LED1-'].update(CIRCLE_OUTLINE)
         window['-LED2-'].update(CIRCLE)
         print('You\'re in a range!! before speech_recognition')
-        if speech_recognition():
-            print("The door is open")
-                # call a function that opens the door
-        else:
-            if speech_recognition():
-                print("The door is open this time")
-            else:
-                print("Come back later")
-            print('You\'re in a range!! after speech_recognition')
-            continue
+        # if speech_recognition():
+        #     print("The door is open")
+        #         # call a function that opens the door
+        # else:
+        #     if speech_recognition():
+        #         print("The door is open this time")
+        #     else:
+        #         print("Come back later")
+        #     print('You\'re in a range!! after speech_recognition')
+        #     continue
     else:
             print('not in range')
         
