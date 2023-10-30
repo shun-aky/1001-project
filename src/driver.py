@@ -2,10 +2,12 @@
 
 # NOTE: import libraries
 import PySimpleGUI as sg
+import threading
 # from speech import speech_recognition
 
 # NOTE: This is for test
-import cv2
+# import cv2
+import time
 
 # NOTE: import other py files
 # import webcam
@@ -33,12 +35,12 @@ def LED(color, key):
 
 initial_page = [
     [sg.Text("Start Application")],
-    [sg.Button("START", size=(20, 2))]
+    [sg.Button("Start", size=(20, 2))]
 ]
 
 image_viewer = [
     [sg.Text("TEST DEMO")],
-    [sg.Image(filename="", key="-IMAGE-")],
+    [sg.Image(key="-IMAGE-")],
 ]
 
 stage_indicator = [
@@ -60,43 +62,73 @@ processing_page = [
 layout = [
     [
         sg.Column(initial_page, key='-COLINIT-', element_justification='c'),
-        sg.Column(processing_page, visible=False, key='-COLPROCESS-')
+        sg.Column(processing_page, key='-COLPROCESS-', visible=False)
     ],
-    [sg.Button("Exit", size=(10, 1))]
+    [sg.Button("Exit", size=(10, 1)), sg.Push(), sg.Button("Stop", visible=False, size=(10, 1))]
 ]
 
 window = sg.Window("Open Sesame Application", layout, location=(800, 400))
 
-webCam = webcam.WebCamera()
+def switchUIinStarting(turnOn: bool):
+    window["-COLINIT-"].update(visible=not turnOn)
+    window["-COLPROCESS-"].update(visible=turnOn)
+    window["Stop"].update(visible=turnOn)
 
+def changeState(fromState: int, toState: int):
+    window[f'-LED{fromState}-'].update(CIRCLE_OUTLINE)
+    window[f'-LED{toState}-'].update(CIRCLE)
+
+def functionInThread(window: sg.Window):
+    time.sleep(5)
+    window.write_event_value('-THREAD DONE-', '')
+
+def createThread():
+    threading.Thread(target=functionInThread, args=(window, ), daemon=True).start()
+
+# webCam = webcam.WebCamera()
+w = 100
 while True:
     event, values = window.read(timeout=20)
     window['-LED1-'].update(CIRCLE)
+
     if event == "Exit" or event == sg.WIN_CLOSED:
         break
 
-    w, frame = webCam.calculateDistance()
+    if event == "Start":
+        switchUIinStarting(True)
+        print("BEFORE")
+        createThread()
+        print("AFTER")
+    elif event == "Stop":
+        print("IN STOP")
+        switchUIinStarting(False)
+    elif event == "-THREAD DONE-":
+        print("Function DONE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    
+    # w, frame = webCam.calculateDistance()
 
-    imgbytes = cv2.imencode('.png', frame)[1].tobytes()
-    window["-IMAGE-"].update(data=imgbytes)
+    # imgbytes = cv2.imencode('.png', frame)[1].tobytes()
+    # window["-IMAGE-"].update(data=imgbytes)
 
-    if w >= 350:
-        window['-LED1-'].update(CIRCLE_OUTLINE)
-        window['-LED2-'].update(CIRCLE)
-        print('You\'re in a range!! before speech_recognition')
-        # if speech_recognition():
-        #     print("The door is open")
-        #         # call a function that opens the door
-        # else:
-        #     if speech_recognition():
-        #         print("The door is open this time")
-        #     else:
-        #         print("Come back later")
-        #     print('You\'re in a range!! after speech_recognition')
-        #     continue
-    else:
-            print('not in range')
-        
+    if window["-COLPROCESS-"].visible:
+        w += 1
+        if w >= 350:
+            changeState(1, 2)
+            print('You\'re in a range!! before speech_recognition')
+            # CREATE THREAD
+            # if speech_recognition():
+            #     print("The door is open")
+            #         # call a function that opens the door
+            # else:
+            #     if speech_recognition():
+            #         print("The door is open this time")
+            #     else:
+            #         print("Come back later")
+            #     print('You\'re in a range!! after speech_recognition')
+            #     continue
+        else:
+                print(f'not in range. w = {w}')
+
 
 # TODO:
 # Initialize parameters
