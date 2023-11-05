@@ -18,6 +18,10 @@ import time
 # NOTE:
 # Initialization below
 
+# NOTE:
+# Global variables
+calling_speech = False
+
 # TODO:
 # Layout GUI (I might need another file)
 
@@ -80,6 +84,17 @@ def changeState(fromState: int, toState: int):
 
 def functionInThread(window: sg.Window):
     time.sleep(5)
+    # if speech_recognition():
+    #     print("The door is open")
+    #     window.write_event_value('-SPEECH DONE-', '')
+    #         # call a function that opens the door
+    # else:
+    #     if speech_recognition():
+    #         print("The door is open this time")
+    #     else:
+    #         print("Come back later")
+    #     print('You\'re in a range!! after speech_recognition')
+    #     continue
     window.write_event_value('-THREAD DONE-', '')
 
 def createThread():
@@ -112,8 +127,11 @@ while True:
 
     if window["-COLPROCESS-"].visible:
         w += 1
-        if w >= 350:
+        if w >= 350 and not calling_speech:
             changeState(1, 2)
+            print("BEFORE")
+            createThread()
+            print("AFTER")
             print('You\'re in a range!! before speech_recognition')
             # CREATE THREAD
             # if speech_recognition():
