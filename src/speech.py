@@ -1,20 +1,15 @@
-# NOTE: this script requires PyAudio because it uses the Microphone class
+# NOTE: this script requires PyAudio since it uses the Microphone class
 # NOTE: this script also needs mpg321 to play audio files (mp3s)
-
-# TODO: we need to integrate speech.py and webcam.py
-# TODO: need to brainstorm the logic at some point
 
 import speech_recognition as sr             # for speech recognition
 # pyfirmata is not supported for Python 3.11. Only till 3.10
 from pyfirmata import Arduino, OUTPUT, util # for communication between this mac and arduino
-# from pymata4 import pymata4
 from time import sleep
-#import pyttsx3                              # for text to speech convirsion
 import os
+from mpyg321.MPyg123Player import MPyg123Player
 
 # constant
-# subject to change based on configuration
-port = "/dev/cu.usbserial-1430"
+port ="/dev/cu.usbserial-1430"
 pin = 13
 pin1 = 1
 pin2 = 2
@@ -23,15 +18,20 @@ pin4 = 4
 pin5 = 5
 
 # initialization
-
-# if we use pymata4
-# board = pymata4.Pymata4()
-# board.set_pin_mode_digital_output(pin)
+player = MPyg123Player()
 
 # if we use pyfirmata
 board = Arduino(port)
 board.digital[pin].mode = OUTPUT
 r = sr.Recognizer()
+
+def open_pin(pin_num):
+    board.digital[pin_num].write(0)
+    #sleep(1)
+
+def close_pin(pin_num):
+    board.digital[pin_num].write(1)
+    #sleep(1)    
 
 def light_on():
     # if we use pymata4
@@ -54,7 +54,8 @@ def speech_recognition():
         r.adjust_for_ambient_noise(source, duration=1)
         print('start listening')
         
-        os.system("mpg321 welcome_words.mp3")
+        # os.system("mpg321 src/welcome_words.mp3")
+        player.play_song("src/welcome_words.mp3")
         audio = r.listen(source, phrase_time_limit=5)
         print("Say something!")
         # This is path sensitive, which means I have to run this code in 1001-project directory
@@ -70,12 +71,14 @@ def speech_recognition():
         print("Google Speech Recognition thinks you said " + text)
         if (text == "open the door"):
             print("door is open!!")
-            os.system("mpg321 success1.mp3")
+            # os.system("mpg321 src/success1.mp3")
+            player.play_song("src/success1.mp3")
             light_on()
             return True
         elif (text == "close the door"):
             print("door is closed!!")
-            os.system("mpg321 success2.mp3")
+            # os.system("mpg321 src/success2.mp3")
+            player.play_song("srdcsuccess2.mp3")
             light_off()
             return True
         return False

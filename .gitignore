@@ -1,2 +1,2 @@
-env_old/
+env/*
 src/__pycache__

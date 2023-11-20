@@ -3,14 +3,15 @@
 # NOTE: import libraries
 import PySimpleGUI as sg
 import threading
-# from speech import speech_recognition
+from speech import speech_recognition, open_pin, close_pin
+import constant
 
 # NOTE: This is for test
-# import cv2
+import cv2
 import time
 
 # NOTE: import other py files
-# import webcam
+import webcam
 
 # TODO:
 # Read a keyword from the repo every week
@@ -83,25 +84,35 @@ def changeState(fromState: int, toState: int):
     window[f'-LED{toState}-'].update(CIRCLE)
 
 def functionInThread(window: sg.Window):
-    time.sleep(5)
-    # if speech_recognition():
-    #     print("The door is open")
-    #     window.write_event_value('-SPEECH DONE-', '')
+    right_word = speech_recognition()
+    #if rirght_word:
+    window.write_event_value('-SPEECH DONE-', right_word)
+    #else:
+      #  window.write_event_value('-SPEECH DONE-', 'FALSE')
+    #if speech_recognition():
+      #  print("The door is open")
+       #ß window.write_event_value('-SPEECH DONE-', '')
     #         # call a function that opens the door
-    # else:
-    #     if speech_recognition():
-    #         print("The door is open this time")
-    #     else:
-    #         print("Come back later")
-    #     print('You\'re in a range!! after speech_recognition')
-    #     continue
-    window.write_event_value('-THREAD DONE-', '')
+    #else:
+        #if speech_recognition():
+          #  window.write_event_value('-SPEECH DONE-', '')
+         #   print("The door is open this time")
+       # else:
+        #    window.write_event_value('-SPEECH DONE-', '')
+      #      print("Come back later")
+     #       print('You\'re in a range!! after speech_recognition')
+    #window.write_event_value('-THREAD DONE-', '')
 
 def createThread():
     threading.Thread(target=functionInThread, args=(window, ), daemon=True).start()
 
-# webCam = webcam.WebCamera()
-w = 100
+webCam = webcam.WebCamera()
+#w = 100
+count = 0
+
+for i in range(2, 9):
+    close_pin(i)
+
 while True:
     event, values = window.read(timeout=20)
     window['-LED1-'].update(CIRCLE)
@@ -111,25 +122,37 @@ while True:
 
     if event == "Start":
         switchUIinStarting(True)
+        open_pin(2)
         print("BEFORE")
-        createThread()
+        #createThread()
         print("AFTER")
     elif event == "Stop":
         print("IN STOP")
         switchUIinStarting(False)
+    elif event == "-SPEECH DONE-":
+        print("speech recognition")
+        calling_speech = False
+        close_pin(3)
+        if values["-SPEECH DONE-"]:
+            open_pin(4)
+        else:
+            open_pin(5)
     elif event == "-THREAD DONE-":
         print("Function DONE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     
-    # w, frame = webCam.calculateDistance()
+    w, frame = webCam.calculateDistance()
 
-    # imgbytes = cv2.imencode('.png', frame)[1].tobytes()
-    # window["-IMAGE-"].update(data=imgbytes)
+    imgbytes = cv2.imencode('.png', frame)[1].tobytes()
+    window["-IMAGE-"].update(data=imgbytes)
 
     if window["-COLPROCESS-"].visible:
         w += 1
         if w >= 350 and not calling_speech:
+            close_pin(2)
+            open_pin(3)
             changeState(1, 2)
             print("BEFORE")
+            calling_speech = True
             createThread()
             print("AFTER")
             print('You\'re in a range!! before speech_recognition')

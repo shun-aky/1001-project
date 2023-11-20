@@ -8,3 +8,4 @@ class Recognition(Enum):
     SECOND_SUCCESS = 2
     SECOND_FAILURE = 3
 
+PIN_1 = 1

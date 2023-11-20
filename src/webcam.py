@@ -9,7 +9,7 @@ from cvzone.FaceDetectionModule import FaceDetector
 # faceCascade = cv2.CascadeClassifier(cascPath)
 class WebCamera:
     def __init__(self) -> None:
-        self.video_capture = cv2.VideoCapture(0)
+        self.video_capture = cv2.VideoCapture(1)
 ##        self.detector = FaceMeshDetector(maxFaces=1)
         self.detector = FaceDetector(minDetectionCon=0.5, modelSelection=0)
         self.focalLength = 630
