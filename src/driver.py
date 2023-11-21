@@ -29,14 +29,14 @@ calling_speech = False
 CIRCLE = '⚫'
 CIRCLE_OUTLINE = '⚪'
 
-def LED(color, key):
+def LED(color, key, mark=CIRCLE_OUTLINE):
     """
     A "user defined element".  In this case our LED is based on a Text element. This gives up 1 location to change how they look, size, etc.
     :param color: (str) The color of the LED
     :param key: (Any) The key used to look up the element
     :return: (sg.Text) Returns a Text element that displays the circle
     """
-    return sg.Text(CIRCLE_OUTLINE, text_color=color, key=key)
+    return sg.Text(mark, text_color=color, key=key)
 
 initial_page = [
     [sg.Text("Start Application")],
@@ -44,12 +44,12 @@ initial_page = [
 ]
 
 image_viewer = [
-    [sg.Text("TEST DEMO")],
+    [sg.Text("Image From the Camera")],
     [sg.Image(key="-IMAGE-")],
 ]
 
 stage_indicator = [
-    [sg.Text("Default"), LED("Red", "-LED1-")],
+    [sg.Text("Default"), LED("Red", "-LED1-", CIRCLE)],
     [sg.Text("Face Detected"), LED("Red", "-LED2-")],
     [sg.Text("Password Passed"), LED("Red", "-LED3-")],
     [sg.Text("Password Failed - Try Again"), LED("Red", "-LED4-")],
@@ -72,7 +72,7 @@ layout = [
     [sg.Button("Exit", size=(10, 1)), sg.Push(), sg.Button("Stop", visible=False, size=(10, 1))]
 ]
 
-window = sg.Window("Open Sesame Application", layout, location=(800, 400))
+window = sg.Window("Open Sesame Application", layout, size=(1100, 700), element_justification='c')
 
 def switchUIinStarting(turnOn: bool):
     window["-COLINIT-"].update(visible=not turnOn)
@@ -85,60 +85,51 @@ def changeState(fromState: int, toState: int):
 
 def functionInThread(window: sg.Window):
     right_word = speech_recognition()
-    #if rirght_word:
     window.write_event_value('-SPEECH DONE-', right_word)
-    #else:
-      #  window.write_event_value('-SPEECH DONE-', 'FALSE')
-    #if speech_recognition():
-      #  print("The door is open")
-       #ß window.write_event_value('-SPEECH DONE-', '')
-    #         # call a function that opens the door
-    #else:
-        #if speech_recognition():
-          #  window.write_event_value('-SPEECH DONE-', '')
-         #   print("The door is open this time")
-       # else:
-        #    window.write_event_value('-SPEECH DONE-', '')
-      #      print("Come back later")
-     #       print('You\'re in a range!! after speech_recognition')
-    #window.write_event_value('-THREAD DONE-', '')
+    time.sleep(2)
+    window.write_event_value('-CLOSE PIN-', right_word)
 
 def createThread():
     threading.Thread(target=functionInThread, args=(window, ), daemon=True).start()
 
-webCam = webcam.WebCamera()
-#w = 100
-count = 0
+def closeAllPins():
+    for i in range(2, 9):
+        close_pin(i)
 
-for i in range(2, 9):
-    close_pin(i)
+webCam = webcam.WebCamera()
+closeAllPins()
+
 
 while True:
     event, values = window.read(timeout=20)
-    window['-LED1-'].update(CIRCLE)
 
     if event == "Exit" or event == sg.WIN_CLOSED:
+        closeAllPins()
         break
 
     if event == "Start":
         switchUIinStarting(True)
         open_pin(2)
-        print("BEFORE")
-        #createThread()
-        print("AFTER")
     elif event == "Stop":
-        print("IN STOP")
         switchUIinStarting(False)
+        closeAllPins()
     elif event == "-SPEECH DONE-":
-        print("speech recognition")
         calling_speech = False
         close_pin(3)
         if values["-SPEECH DONE-"]:
             open_pin(4)
+            changeState(2, 3)
         else:
             open_pin(5)
-    elif event == "-THREAD DONE-":
-        print("Function DONE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            changeState(2, 4)
+    elif event == "-CLOSE PIN-":
+        if values["-CLOSE PIN-"]:
+            close_pin(4)
+            changeState(3, 1)
+        else:
+            close_pin(5)
+            changeState(4, 1)
+        open_pin(2)
     
     w, frame = webCam.calculateDistance()
 
@@ -146,32 +137,13 @@ while True:
     window["-IMAGE-"].update(data=imgbytes)
 
     if window["-COLPROCESS-"].visible:
-        w += 1
         if w >= 350 and not calling_speech:
             close_pin(2)
             open_pin(3)
             changeState(1, 2)
-            print("BEFORE")
             calling_speech = True
             createThread()
-            print("AFTER")
-            print('You\'re in a range!! before speech_recognition')
-            # CREATE THREAD
-            # if speech_recognition():
-            #     print("The door is open")
-            #         # call a function that opens the door
-            # else:
-            #     if speech_recognition():
-            #         print("The door is open this time")
-            #     else:
-            #         print("Come back later")
-            #     print('You\'re in a range!! after speech_recognition')
-            #     continue
+            print('in a range. call speech_recognition function')
         else:
-                print(f'not in range. w = {w}')
-
-
-# TODO:
-# Initialize parameters
-# webCamera = webcam.WebCamera()
+            print(f'not in range. w = {w}')
 

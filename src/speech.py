@@ -18,47 +18,27 @@ pin4 = 4
 pin5 = 5
 
 # initialization
-player = MPyg123Player()
-
-# if we use pyfirmata
 board = Arduino(port)
 board.digital[pin].mode = OUTPUT
-r = sr.Recognizer()
+recognizer = sr.Recognizer()
+player = MPyg123Player()
 
 def open_pin(pin_num):
+    print(f"Open {pin_num}")
     board.digital[pin_num].write(0)
-    #sleep(1)
 
 def close_pin(pin_num):
+    print(f"Close {pin_num}")
     board.digital[pin_num].write(1)
-    #sleep(1)    
-
-def light_on():
-    # if we use pymata4
-    # board.digital_write(pin, 1)
-    # if we use pyfirmata
-    board.digital[pin].write(1)
-    sleep(1)
-
-def light_off():
-    # if we use pymata4
-    # board.digital_write(pin, 0)
-    # if we use pyfirmata
-    board.digital[pin].write(0)
-    sleep(1)
 
 def speech_recognition():
-    light_off()
     # obtain audio from the microphone
     with sr.Microphone() as source:
-        r.adjust_for_ambient_noise(source, duration=1)
+        recognizer.adjust_for_ambient_noise(source, duration=1)
         print('start listening')
-        
-        # os.system("mpg321 src/welcome_words.mp3")
         player.play_song("src/welcome_words.mp3")
-        audio = r.listen(source, phrase_time_limit=5)
+        audio = recognizer.listen(source, phrase_time_limit=5)
         print("Say something!")
-        # This is path sensitive, which means I have to run this code in 1001-project directory
         print('finish listening')
 
     # recognize speech using Google Speech Recognition
@@ -67,19 +47,15 @@ def speech_recognition():
         # to use another API key, use `r.recognize_google(audio, key="GOOGLE_SPEECH_RECOGNITION_API_KEY")`
         # instead of `r.recognize_google(audio)`
         print('start recognizing')
-        text = r.recognize_google(audio, language='en-us')
+        text = recognizer.recognize_google(audio, language='en-us')
         print("Google Speech Recognition thinks you said " + text)
         if (text == "open the door"):
             print("door is open!!")
-            # os.system("mpg321 src/success1.mp3")
             player.play_song("src/success1.mp3")
-            light_on()
             return True
         elif (text == "close the door"):
             print("door is closed!!")
-            # os.system("mpg321 src/success2.mp3")
             player.play_song("srdcsuccess2.mp3")
-            light_off()
             return True
         return False
     except sr.UnknownValueError:
