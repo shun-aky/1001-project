@@ -62,7 +62,7 @@ def speech_recognition():
     with sr.Microphone() as source:
         recognizer.adjust_for_ambient_noise(source, duration=1)
         print('start listening')
-        player.play_song("src/welcome_words.mp3")
+        player.play_song("/Users/newuser/1001++/1001-project/src/welcome_words.mp3")
         audio = recognizer.listen(source, phrase_time_limit=5)
         print("Say something!")
         print('finish listening')
@@ -77,7 +77,7 @@ def speech_recognition():
         print("Google Speech Recognition thinks you said " + text)
         if (text == keyword):
             print("door is open!!")
-            player.play_song("src/success1.mp3")
+            player.play_song("/Users/newuser/1001++/1001-project/src/success1.mp3")
             return True
         return False
     except sr.UnknownValueError:
