@@ -9,7 +9,7 @@ import time
 # NOTE: import other py files
 import constant
 from gui import window, CIRCLE_OUTLINE, CIRCLE
-from speech import speech_recognition, open_pin, close_pin, closeAllPins
+from speech import speech_recognition, open_pin, close_pin, closeAllPins, initialize_speech
 import webcam
 
 def switchUIinStarting(turnOn: bool) -> None:
@@ -35,7 +35,9 @@ def initialize():
     global webCam, calling_speech
     webCam = webcam.WebCamera()
     calling_speech = False
+    initialize_speech()
     closeAllPins()
+    print("Finished initialization in driver.py")
 
 def main():
     initialize()
