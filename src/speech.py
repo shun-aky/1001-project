@@ -1,16 +1,12 @@
 # NOTE: this script requires PyAudio since it uses the Microphone class
-# NOTE: this script also needs mpg321 to play audio files (mp3s)
 
 import speech_recognition as sr             # for speech recognition
 # pyfirmata is not supported for Python 3.11. Only till 3.10
-from pyfirmata import Arduino, OUTPUT, util # for communication between this mac and arduino
-from time import sleep
-import os
+from pyfirmata import Arduino # for communication between this mac and arduino
 from mpyg321.MPyg123Player import MPyg123Player
 
 # constant
 port ="/dev/cu.usbserial-1430"
-pin = 13
 pin1 = 1
 pin2 = 2
 pin3 = 3
@@ -19,7 +15,6 @@ pin5 = 5
 
 # initialization
 board = Arduino(port)
-board.digital[pin].mode = OUTPUT
 recognizer = sr.Recognizer()
 player = MPyg123Player()
 
@@ -30,6 +25,13 @@ def open_pin(pin_num):
 def close_pin(pin_num):
     print(f"Close {pin_num}")
     board.digital[pin_num].write(1)
+
+def closeAllPins():
+    for i in range(2, 9):
+        close_pin(i)
+
+def get_keyword():
+    
 
 def speech_recognition():
     # obtain audio from the microphone
